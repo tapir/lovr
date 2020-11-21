@@ -1,4 +1,4 @@
-#include "api.h"
+#include "luax.h"
 #include "thread/channel.h"
 #include "event/event.h"
 #include <math.h>

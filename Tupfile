@@ -42,7 +42,7 @@ SRC_@(MATH) += src/lib/noise1234/noise1234.c
 SRC_@(THREAD) += src/lib/tinycthread/tinycthread.c
 
 # api
-SRC += src/api/api.c
+SRC += src/api/luax.c
 SRC += src/api/l_lovr.c
 SRC_@(AUDIO) += src/api/l_audio*.c
 SRC_@(DATA) += src/api/l_data*.c

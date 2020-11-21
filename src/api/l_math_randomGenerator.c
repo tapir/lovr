@@ -1,4 +1,4 @@
-#include "api.h"
+#include "luax.h"
 #include "math/randomGenerator.h"
 #include <math.h>
 

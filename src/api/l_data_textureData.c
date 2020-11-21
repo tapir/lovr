@@ -1,4 +1,4 @@
-#include "api.h"
+#include "luax.h"
 #include "data/textureData.h"
 
 static int l_lovrTextureDataEncode(lua_State* L) {

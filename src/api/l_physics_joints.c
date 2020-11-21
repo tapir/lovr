@@ -1,4 +1,4 @@
-#include "api.h"
+#include "luax.h"
 #include "physics/physics.h"
 
 void luax_pushjoint(lua_State* L, Joint* joint) {

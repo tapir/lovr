@@ -1,4 +1,4 @@
-#include "api.h"
+#include "luax.h"
 #include "timer/timer.h"
 
 static int l_lovrTimerGetDelta(lua_State* L) {

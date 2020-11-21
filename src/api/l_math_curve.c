@@ -1,4 +1,4 @@
-#include "api.h"
+#include "luax.h"
 #include "math/curve.h"
 #include "core/util.h"
 #include <stdlib.h>

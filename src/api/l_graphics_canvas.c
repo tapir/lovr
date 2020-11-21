@@ -1,4 +1,4 @@
-#include "api.h"
+#include "luax.h"
 #include "graphics/canvas.h"
 #include "graphics/graphics.h"
 #include "core/ref.h"

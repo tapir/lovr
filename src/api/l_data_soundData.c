@@ -1,4 +1,4 @@
-#include "api.h"
+#include "luax.h"
 #include "data/soundData.h"
 
 static int l_lovrSoundDataGetBitDepth(lua_State* L) {

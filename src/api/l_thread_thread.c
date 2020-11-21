@@ -1,4 +1,4 @@
-#include "api.h"
+#include "luax.h"
 #include "thread/thread.h"
 
 static int l_lovrThreadStart(lua_State* L) {

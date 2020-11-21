@@ -1,4 +1,4 @@
-#include "api.h"
+#include "luax.h"
 #include "data/rasterizer.h"
 
 static int l_lovrRasterizerGetHeight(lua_State* L) {

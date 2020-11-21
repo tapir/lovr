@@ -1,4 +1,4 @@
-#include "api.h"
+#include "luax.h"
 #include "graphics/buffer.h"
 #include "graphics/shader.h"
 #include <stdlib.h>

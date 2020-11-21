@@ -1,5 +1,5 @@
 #include "resources/boot.lua.h"
-#include "api/api.h"
+#include "api/luax.h"
 #include "event/event.h"
 #include "core/os.h"
 #include "core/util.h"

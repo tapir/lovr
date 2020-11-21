@@ -1,4 +1,4 @@
-#include "api.h"
+#include "luax.h"
 #include "core/os.h"
 #include "core/ref.h"
 #include "core/util.h"

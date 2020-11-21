@@ -1,4 +1,4 @@
-#include "api.h"
+#include "luax.h"
 #include "data/blob.h"
 
 static int l_lovrBlobGetName(lua_State* L) {
