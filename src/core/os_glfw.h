@@ -219,6 +219,9 @@ bool lovrPlatformCreateWindow(const WindowFlags* flags) {
   }
 
 
+#ifdef LOVR_VK
+  glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+#endif
 #ifdef LOVR_LINUX_EGL
   glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
 #endif
@@ -260,7 +263,9 @@ bool lovrPlatformCreateWindow(const WindowFlags* flags) {
     });
   }
 
+#ifndef LOVR_VK
   glfwMakeContextCurrent(glfwState.window);
+#endif
   glfwSetWindowCloseCallback(glfwState.window, onWindowClose);
   glfwSetWindowFocusCallback(glfwState.window, onWindowFocus);
   glfwSetWindowSizeCallback(glfwState.window, onWindowResize);
@@ -294,6 +299,9 @@ void lovrPlatformGetFramebufferSize(int* width, int* height) {
 }
 
 void lovrPlatformSetSwapInterval(int interval) {
+#ifdef LOVR_VK
+  return;
+#endif
 #if EMSCRIPTEN
   glfwSwapInterval(1);
 #else
@@ -367,23 +375,19 @@ HGLRC lovrPlatformGetContext() {
 #endif
 
 #ifdef LOVR_LINUX_EGL
-PFNEGLGETPROCADDRESSPROC lovrPlatformGetEGLProcAddr(void)
-{
+PFNEGLGETPROCADDRESSPROC lovrPlatformGetEGLProcAddr(void) {
   return (PFNEGLGETPROCADDRESSPROC)glfwGetProcAddress;
 }
 
-EGLDisplay lovrPlatformGetEGLDisplay(void)
-{
+EGLDisplay lovrPlatformGetEGLDisplay(void) {
   return glfwGetEGLDisplay();
 }
 
-EGLContext lovrPlatformGetEGLContext(void)
-{
+EGLContext lovrPlatformGetEGLContext(void) {
   return glfwGetEGLContext(glfwState.window);
 }
 
-EGLConfig lovrPlatformGetEGLConfig(void)
-{
+EGLConfig lovrPlatformGetEGLConfig(void) {
   EGLDisplay dpy = lovrPlatformGetEGLDisplay();
   EGLContext ctx = lovrPlatformGetEGLContext();
   EGLint cfg_id = -1;
@@ -403,18 +407,19 @@ EGLConfig lovrPlatformGetEGLConfig(void)
 #endif
 
 #ifdef LOVR_LINUX_X11
-Display* lovrPlatformGetX11Display(void)
-{
+Display* lovrPlatformGetX11Display(void) {
   return glfwGetX11Display();
 }
 
-GLXDrawable lovrPlatformGetGLXDrawable(void)
-{
+Window lovrPlatformGetX11Window(void) {
+  return glfwGetX11Window(glfwState.window);
+}
+
+GLXDrawable lovrPlatformGetGLXDrawable(void) {
   return glfwGetGLXWindow(glfwState.window);
 }
 
-GLXContext lovrPlatformGetGLXContext(void)
-{
+GLXContext lovrPlatformGetGLXContext(void) {
   return glfwGetGLXContext(glfwState.window);
 }
 #endif
