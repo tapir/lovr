@@ -1,5 +1,9 @@
 #include "util.h"
 
+#ifdef LOVR_VK
+#include <vulkan/vulkan.h>
+#endif
+
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
@@ -421,5 +425,15 @@ GLXDrawable lovrPlatformGetGLXDrawable(void) {
 
 GLXContext lovrPlatformGetGLXContext(void) {
   return glfwGetGLXContext(glfwState.window);
+}
+#endif
+
+#ifdef LOVR_VK
+const char** lovrPlatformGetVulkanInstanceExtensions(uint32_t* count) {
+  return glfwGetRequiredInstanceExtensions(count);
+}
+
+uint32_t lovrPlatformCreateVulkanSurface(void* instance, void** surface) {
+  return glfwCreateWindowSurface(instance, glfwState.window, NULL, (VkSurfaceKHR*) surface);
 }
 #endif
