@@ -1,59 +1,81 @@
 #include "api.h"
 #include "graphics/graphics.h"
+#include "data/textureData.h"
+#include "core/os.h"
+#include "core/ref.h"
+#include <stdlib.h>
 
-// Transforms
+// Must be released when done
+static TextureData* luax_checktexturedata(lua_State* L, int index, bool flip) {
+  TextureData* textureData = luax_totype(L, index, TextureData);
 
-static int l_lovrGraphicsPush(lua_State* L) {
-  lovrGraphicsPush();
-  return 0;
+  if (textureData) {
+    lovrRetain(textureData);
+  } else {
+    Blob* blob = luax_readblob(L, index, "Texture");
+    textureData = lovrTextureDataCreateFromBlob(blob, flip);
+    lovrRelease(Blob, blob);
+  }
+
+  return textureData;
 }
 
-static int l_lovrGraphicsPop(lua_State* L) {
-  lovrGraphicsPop();
-  return 0;
-}
+static int l_lovrGraphicsCreateWindow(lua_State* L) {
+  WindowFlags flags;
+  memset(&flags, 0, sizeof(flags));
 
-static int l_lovrGraphicsOrigin(lua_State* L) {
-  lovrGraphicsOrigin();
-  return 0;
-}
+  if (!lua_toboolean(L, 1)) {
+    return 0;
+  }
 
-static int l_lovrGraphicsTranslate(lua_State* L) {
-  float translation[4];
-  luax_readvec3(L, 1, translation, NULL);
-  lovrGraphicsTranslate(translation);
-  return 0;
-}
+  luaL_checktype(L, 1, LUA_TTABLE);
 
-static int l_lovrGraphicsRotate(lua_State* L) {
-  float rotation[4];
-  luax_readquat(L, 1, rotation, NULL);
-  lovrGraphicsRotate(rotation);
-  return 0;
-}
+  lua_getfield(L, 1, "width");
+  flags.width = luaL_optinteger(L, -1, 1080);
+  lua_pop(L, 1);
 
-static int l_lovrGraphicsScale(lua_State* L) {
-  float scale[4];
-  luax_readscale(L, 1, scale, 3, NULL);
-  lovrGraphicsScale(scale);
-  return 0;
-}
+  lua_getfield(L, 1, "height");
+  flags.height = luaL_optinteger(L, -1, 600);
+  lua_pop(L, 1);
 
-static int l_lovrGraphicsTransform(lua_State* L) {
-  float transform[16];
-  luax_readmat4(L, 1, transform, 3);
-  lovrGraphicsMatrixTransform(transform);
+  lua_getfield(L, 1, "fullscreen");
+  flags.fullscreen = lua_toboolean(L, -1);
+  lua_pop(L, 1);
+
+  lua_getfield(L, 1, "resizable");
+  flags.resizable = lua_toboolean(L, -1);
+  lua_pop(L, 1);
+
+  lua_getfield(L, 1, "msaa");
+  flags.msaa = lua_tointeger(L, -1);
+  lua_pop(L, 1);
+
+  lua_getfield(L, 1, "title");
+  flags.title = luaL_optstring(L, -1, "LÖVR");
+  lua_pop(L, 1);
+
+  lua_getfield(L, 1, "icon");
+  TextureData* textureData = NULL;
+  if (!lua_isnil(L, -1)) {
+    textureData = luax_checktexturedata(L, -1, false);
+    flags.icon.data = textureData->blob->data;
+    flags.icon.width = textureData->width;
+    flags.icon.height = textureData->height;
+  }
+  lua_pop(L, 1);
+
+  lua_getfield(L, 1, "vsync");
+  flags.vsync = lua_tointeger(L, -1);
+  lua_pop(L, 1);
+
+  lovrGraphicsCreateWindow(&flags);
+  luax_atexit(L, lovrGraphicsDestroy); // The lua_State that creates the window shall be the one to destroy it
+  lovrRelease(TextureData, textureData);
   return 0;
 }
 
 static const luaL_Reg lovrGraphics[] = {
-  { "push", l_lovrGraphicsPush },
-  { "pop", l_lovrGraphicsPop },
-  { "origin", l_lovrGraphicsOrigin },
-  { "translate", l_lovrGraphicsTranslate },
-  { "rotate", l_lovrGraphicsRotate },
-  { "scale", l_lovrGraphicsScale },
-  { "transform", l_lovrGraphicsTransform },
+  { "createWindow", l_lovrGraphicsCreateWindow },
   { NULL, NULL }
 };
 
@@ -69,11 +91,13 @@ int luaopen_lovr_graphics(lua_State* L) {
     debug = lua_toboolean(L, -1);
     lua_pop(L, 1);
   }
-  lua_pop(L, 2);
+  lua_pop(L, 1);
 
-  if (lovrGraphicsInit(debug)) {
-    luax_atexit(L, lovrGraphicsDestroy);
-  }
+  lovrGraphicsInit(debug);
 
+  lua_pushcfunction(L, l_lovrGraphicsCreateWindow);
+  lua_getfield(L, -2, "window");
+  lua_call(L, 1, 0);
+  lua_pop(L, 1);
   return 1;
 }

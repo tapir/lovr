@@ -646,7 +646,8 @@ bool gpu_init(gpu_config* config) {
       .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
       .preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR,
       .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
-      .presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR, // Disables vsync, may not be supported (TODO)
+      // TODO IMMEDIATE may not be supported, only FIFO is guaranteed
+      .presentMode = state.config.vk.vsync ? VK_PRESENT_MODE_FIFO_KHR : VK_PRESENT_MODE_IMMEDIATE_KHR,
       .clipped = VK_TRUE
     };
 
@@ -1508,7 +1509,7 @@ size_t gpu_sizeof_shader() {
 bool gpu_shader_init(gpu_shader* shader, gpu_shader_info* info) {
   memset(shader, 0, sizeof(*shader));
 
-  VkDescriptorSetLayoutCreateInfo layoutInfo[COUNTOF(shader->layouts)];
+  VkDescriptorSetLayoutCreateInfo layoutInfo[COUNTOF(shader->layouts)] = { 0 };
   VkDescriptorSetLayoutBinding bindings[COUNTOF(shader->layouts)][32];
 
   if (info->compute.code) {
@@ -1539,6 +1540,7 @@ bool gpu_shader_init(gpu_shader* shader, gpu_shader_info* info) {
   uint32_t layoutCount = 0;
 
   for (uint32_t i = 0; i < COUNTOF(shader->layouts); i++) {
+    layoutInfo[i].sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     layoutInfo[i].pBindings = bindings[i];
 
     if (vkCreateDescriptorSetLayout(state.device, &layoutInfo[i], NULL, &shader->layouts[i])) {

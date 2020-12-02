@@ -198,17 +198,8 @@ function lovr.run()
       end
     end
     if lovr.update then lovr.update(dt) end
-    if lovr.graphics then
-      lovr.graphics.origin()
-      if lovr.draw then
-        if lovr.headset then
-          lovr.headset.renderTo(lovr.draw)
-        end
-        if lovr.graphics.hasWindow() then
-          lovr.mirror()
-        end
-      end
-      lovr.graphics.present()
+    if lovr.graphics and lovr.draw then
+      lovr.draw()
     end
     if lovr.math then
       lovr.math.drain()

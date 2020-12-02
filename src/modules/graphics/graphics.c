@@ -1,69 +1,67 @@
 #include "graphics/graphics.h"
+#include "event/event.h"
 #include "core/gpu.h"
-#include "core/maf.h"
+#include "core/os.h"
 #include "core/util.h"
 #include <string.h>
 
-#define MAX_TRANSFORMS 64
+#ifdef LOVR_VK
+const char** lovrPlatformGetVulkanInstanceExtensions(uint32_t* count);
+uint32_t lovrPlatformCreateVulkanSurface(void* instance, void** surface);
+#endif
 
 static struct {
   bool initialized;
-  float transforms[MAX_TRANSFORMS][16];
-  uint32_t transform;
+  bool debug;
+  int width;
+  int height;
 } state;
 
-void onMessage(void* context, const char* message, int severe) {
+void onDebugMessage(void* context, const char* message, int severe) {
   lovrLog(severe ? LOG_ERROR : LOG_DEBUG, "GPU", message);
 }
 
+void onQuitRequest() {
+  lovrEventPush((Event) { .type = EVENT_QUIT, .data.quit = { .exitCode = 0 } });
+}
+
+void onResizeWindow(int width, int height) {
+  state.width = width;
+  state.height = height;
+  lovrEventPush((Event) { .type = EVENT_RESIZE, .data.resize = { width, height } });
+}
+
 bool lovrGraphicsInit(bool debug) {
-  if (state.initialized) return false;
-
-  gpu_config config = {
-    .debug = debug,
-    .callback = onMessage
-  };
-
-  if (!gpu_init(&config)) {
-    return false;
-  }
-
-  state.initialized = true;
-  return true;
+  state.debug = debug;
+  return false;
 }
 
 void lovrGraphicsDestroy() {
+  if (!state.initialized) return;
+  gpu_thread_detach();
   gpu_destroy();
   memset(&state, 0, sizeof(state));
 }
 
-// Transforms
+void lovrGraphicsCreateWindow(WindowFlags* flags) {
+  flags->debug = state.debug;
+  lovrAssert(!state.initialized, "Window is already created");
+  lovrAssert(lovrPlatformCreateWindow(flags), "Could not create window");
+  lovrPlatformSetSwapInterval(flags->vsync); // Force vsync in case lovr.headset changed it in a previous restart
+  lovrPlatformOnQuitRequest(onQuitRequest);
+  lovrPlatformOnWindowResize(onResizeWindow);
+  lovrPlatformGetFramebufferSize(&state.width, &state.height);
 
-void lovrGraphicsPush() {
-  lovrAssert(++state.transform < MAX_TRANSFORMS, "Unbalanced matrix stack (more pushes than pops?)");
-  mat4_init(state.transforms[state.transform], state.transforms[state.transform - 1]);
-}
+  gpu_config config = {
+    .debug = state.debug,
+    .callback = onDebugMessage,
+    .vk.surface = true,
+    .vk.vsync = flags->vsync,
+    .vk.getExtraInstanceExtensions = lovrPlatformGetVulkanInstanceExtensions,
+    .vk.createSurface = lovrPlatformCreateVulkanSurface
+  };
 
-void lovrGraphicsPop() {
-  lovrAssert(--state.transform >= 0, "Unbalanced matrix stack (more pops than pushes?)");
-}
-
-void lovrGraphicsOrigin() {
-  mat4_identity(state.transforms[state.transform]);
-}
-
-void lovrGraphicsTranslate(vec3 translation) {
-  mat4_translate(state.transforms[state.transform], translation[0], translation[1], translation[2]);
-}
-
-void lovrGraphicsRotate(quat rotation) {
-  mat4_rotateQuat(state.transforms[state.transform], rotation);
-}
-
-void lovrGraphicsScale(vec3 scale) {
-  mat4_scale(state.transforms[state.transform], scale[0], scale[1], scale[2]);
-}
-
-void lovrGraphicsMatrixTransform(mat4 transform) {
-  mat4_multiply(state.transforms[state.transform], transform);
+  lovrAssert(gpu_init(&config), "Could not initialize GPU");
+  gpu_thread_attach();
+  state.initialized = true;
 }
