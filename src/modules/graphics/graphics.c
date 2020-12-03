@@ -13,6 +13,7 @@ uint32_t lovrPlatformCreateVulkanSurface(void* instance, void** surface);
 static struct {
   bool initialized;
   bool debug;
+  gpu_features features;
   gpu_limits limits;
   int width;
   int height;
@@ -55,6 +56,7 @@ void lovrGraphicsCreateWindow(WindowFlags* flags) {
 
   gpu_config config = {
     .debug = state.debug,
+    .features = &state.features,
     .limits = &state.limits,
     .callback = onDebugMessage,
     .vk.surface = true,
@@ -68,34 +70,47 @@ void lovrGraphicsCreateWindow(WindowFlags* flags) {
   state.initialized = true;
 }
 
-void lovrGraphicsGetLimits(double limits[MAX_LIMITS]) {
-  limits[LIMIT_TEXTURE_SIZE_2D] = state.limits.textureSize2D;
-  limits[LIMIT_TEXTURE_SIZE_3D] = state.limits.textureSize3D;
-  limits[LIMIT_TEXTURE_SIZE_CUBE] = state.limits.textureSizeCube;
-  limits[LIMIT_TEXTURE_LAYERS] = state.limits.textureLayers;
-  limits[LIMIT_RENDER_WIDTH] = state.limits.canvasSize[0];
-  limits[LIMIT_RENDER_HEIGHT] = state.limits.canvasSize[1];
-  limits[LIMIT_RENDER_VIEWS] = state.limits.canvasViews;
-  limits[LIMIT_SHADER_GROUPS] = state.limits.bundleCount;
-  limits[LIMIT_SHADER_GROUP_ITEMS] = state.limits.bundleSlots;
-  limits[LIMIT_INPUT_BUFFER_RANGE] = state.limits.uniformBufferRange;
-  limits[LIMIT_INPUT_BUFFER_ALIGN] = state.limits.uniformBufferAlign;
-  limits[LIMIT_COMPUTE_BUFFER_RANGE] = state.limits.storageBufferRange;
-  limits[LIMIT_COMPUTE_BUFFER_ALIGN] = state.limits.storageBufferAlign;
-  limits[LIMIT_VERTEX_ATTRIBUTES] = state.limits.vertexAttributes;
-  limits[LIMIT_VERTEX_ATTRIBUTE_OFFSET] = state.limits.vertexAttributeOffset;
-  limits[LIMIT_VERTEX_BUFFERS] = state.limits.vertexBuffers;
-  limits[LIMIT_VERTEX_BUFFER_STRIDE] = state.limits.vertexBufferStride;
-  limits[LIMIT_VERTEX_SHADER_OUTPUTS] = state.limits.vertexShaderOutputs;
-  limits[LIMIT_COMPUTE_WIDTH] = state.limits.computeCount[0];
-  limits[LIMIT_COMPUTE_HEIGHT] = state.limits.computeCount[1];
-  limits[LIMIT_COMPUTE_DEPTH] = state.limits.computeCount[2];
-  limits[LIMIT_COMPUTE_GROUP_WIDTH] = state.limits.computeGroupSize[0];
-  limits[LIMIT_COMPUTE_GROUP_HEIGHT] = state.limits.computeGroupSize[1];
-  limits[LIMIT_COMPUTE_GROUP_DEPTH] = state.limits.computeGroupSize[2];
-  limits[LIMIT_COMPUTE_GROUP_VOLUME] = state.limits.computeGroupVolume;
-  limits[LIMIT_COMPUTE_SHARED_MEMORY] = state.limits.computeSharedMemory;
-  limits[LIMIT_ALLOCATION_SIZE] = state.limits.allocationSize;
-  limits[LIMIT_POINT_SIZE] = state.limits.pointSize[1];
-  limits[LIMIT_ANISOTROPY] = state.limits.anisotropy;
+void lovrGraphicsGetFeatures(GraphicsFeatures* features) {
+  features->bptc = state.features.bptc;
+  features->astc = state.features.astc;
+  features->pointSize = state.features.pointSize;
+  features->wireframe = state.features.wireframe;
+  features->anisotropy = state.features.anisotropy;
+  features->clipDistance = state.features.clipDistance;
+  features->cullDistance = state.features.cullDistance;
+  features->fullIndexBufferRange = state.features.fullIndexBufferRange;
+  features->indirectDrawCount = state.features.indirectDrawCount;
+  features->indirectDrawFirstInstance = state.features.indirectDrawFirstInstance;
+  features->extraShaderInputs = state.features.extraShaderInputs;
+  features->multiview = state.features.multiview;
+}
+
+void lovrGraphicsGetLimits(GraphicsLimits* limits) {
+  limits->textureSize2D = state.limits.textureSize2D;
+  limits->textureSize3D = state.limits.textureSize3D;
+  limits->textureSizeCube = state.limits.textureSizeCube;
+  limits->textureLayers = state.limits.textureLayers;
+  limits->canvasSize[0] = state.limits.canvasSize[0];
+  limits->canvasSize[1] = state.limits.canvasSize[1];
+  limits->canvasViews = state.limits.canvasViews;
+  limits->bundleCount = state.limits.bundleCount;
+  limits->bundleSlots = state.limits.bundleSlots;
+  limits->uniformBufferRange = state.limits.uniformBufferRange;
+  limits->storageBufferRange = state.limits.storageBufferRange;
+  limits->uniformBufferAlign = state.limits.uniformBufferAlign;
+  limits->storageBufferAlign = state.limits.storageBufferAlign;
+  limits->vertexAttributes = state.limits.vertexAttributes;
+  limits->vertexAttributeOffset = state.limits.vertexAttributeOffset;
+  limits->vertexBuffers = state.limits.vertexBuffers;
+  limits->vertexBufferStride = state.limits.vertexBufferStride;
+  limits->vertexShaderOutputs = state.limits.vertexShaderOutputs;
+  memcpy(limits->computeCount, state.limits.computeCount, 3 * sizeof(uint32_t));
+  memcpy(limits->computeGroupSize, state.limits.computeGroupSize, 3 * sizeof(uint32_t));
+  limits->computeGroupVolume = state.limits.computeGroupVolume;
+  limits->computeSharedMemory = state.limits.computeSharedMemory;
+  limits->indirectDrawCount = state.limits.indirectDrawCount;
+  limits->allocationSize = state.limits.allocationSize;
+  limits->pointSize[0] = state.limits.pointSize[0];
+  limits->pointSize[1] = state.limits.pointSize[1];
+  limits->anisotropy = state.limits.anisotropy;
 }

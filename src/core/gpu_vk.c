@@ -552,7 +552,6 @@ bool gpu_init(gpu_config* config) {
     };
 
     if (config->features) {
-      gpu_features* features = config->features;
       VkPhysicalDeviceShaderDrawParameterFeatures supportsShaderDrawParameter = { .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETER_FEATURES };
       VkPhysicalDeviceFeatures2 root = { .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, .pNext = &supportsShaderDrawParameter };
       vkGetPhysicalDeviceFeatures2(state.physicalDevice, &root);
@@ -560,27 +559,25 @@ bool gpu_init(gpu_config* config) {
       VkPhysicalDeviceFeatures* enable = &enabledFeatures.features;
       VkPhysicalDeviceFeatures* supports = &root.features;
 
-      // For each feature, enable it only if it was requested and it's supported.
-      // Report any unsupported features by writing back to the input feature struct.
-      features->astc = enable->textureCompressionASTC_LDR = (features->astc && supports->textureCompressionASTC_LDR);
-      features->bptc = enable->textureCompressionBC = (features->bptc && supports->textureCompressionBC);
-      features->pointSize = enable->largePoints = (features->pointSize && supports->largePoints);
-      features->wireframe = enable->fillModeNonSolid = (features->wireframe && supports->fillModeNonSolid);
-      features->anisotropy = enable->samplerAnisotropy = (features->anisotropy && supports->samplerAnisotropy);
-      features->clipDistance = enable->shaderClipDistance = (features->clipDistance && supports->shaderClipDistance);
-      features->cullDistance = enable->shaderCullDistance = (features->cullDistance && supports->shaderCullDistance);
-      features->fullIndexBufferRange = enable->fullDrawIndexUint32 = (features->fullIndexBufferRange && supports->fullDrawIndexUint32);
-      features->indirectDrawCount = enable->multiDrawIndirect = (features->indirectDrawCount && supports->multiDrawIndirect);
-      features->indirectDrawFirstInstance = enable->drawIndirectFirstInstance = (features->indirectDrawFirstInstance && supports->drawIndirectFirstInstance);
-      features->extraShaderInputs = enableShaderDrawParameter.shaderDrawParameters = (features->extraShaderInputs && supportsShaderDrawParameter.shaderDrawParameters);
-      enableMultiview.multiview = features->multiview; // Always supported in 1.1
+      config->features->astc = enable->textureCompressionASTC_LDR = supports->textureCompressionASTC_LDR;
+      config->features->bptc = enable->textureCompressionBC = supports->textureCompressionBC;
+      config->features->pointSize = enable->largePoints = supports->largePoints;
+      config->features->wireframe = enable->fillModeNonSolid = supports->fillModeNonSolid;
+      config->features->anisotropy = enable->samplerAnisotropy = supports->samplerAnisotropy;
+      config->features->clipDistance = enable->shaderClipDistance = supports->shaderClipDistance;
+      config->features->cullDistance = enable->shaderCullDistance = supports->shaderCullDistance;
+      config->features->fullIndexBufferRange = enable->fullDrawIndexUint32 = supports->fullDrawIndexUint32;
+      config->features->indirectDrawCount = enable->multiDrawIndirect = supports->multiDrawIndirect;
+      config->features->indirectDrawFirstInstance = enable->drawIndirectFirstInstance = supports->drawIndirectFirstInstance;
+      config->features->extraShaderInputs = enableShaderDrawParameter.shaderDrawParameters = supportsShaderDrawParameter.shaderDrawParameters;
+      config->features->multiview = enableMultiview.multiview = true; // Always supported in 1.1
 
       VkFormatProperties formatProperties;
       for (uint32_t i = 0; i < COUNTOF(textureFormats); i++) {
         vkGetPhysicalDeviceFormatProperties(state.physicalDevice, textureFormats[i][LINEAR], &formatProperties);
         uint32_t blitMask = VK_FORMAT_FEATURE_BLIT_SRC_BIT | VK_FORMAT_FEATURE_BLIT_DST_BIT;
         uint32_t flags = formatProperties.optimalTilingFeatures;
-        features->formats[i] =
+        config->features->formats[i] =
           ((flags & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT) ? GPU_FORMAT_FEATURE_SAMPLE : 0) |
           ((flags & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT) ? GPU_FORMAT_FEATURE_CANVAS_COLOR : 0) |
           ((flags & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) ? GPU_FORMAT_FEATURE_CANVAS_DEPTH : 0) |

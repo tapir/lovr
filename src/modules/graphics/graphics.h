@@ -1,43 +1,55 @@
 #include <stdbool.h>
+#include <stdint.h>
 
 #pragma once
 
 struct WindowFlags;
 
-typedef enum {
-  LIMIT_TEXTURE_SIZE_2D,
-  LIMIT_TEXTURE_SIZE_3D,
-  LIMIT_TEXTURE_SIZE_CUBE,
-  LIMIT_TEXTURE_LAYERS,
-  LIMIT_RENDER_WIDTH,
-  LIMIT_RENDER_HEIGHT,
-  LIMIT_RENDER_VIEWS,
-  LIMIT_SHADER_GROUPS,
-  LIMIT_SHADER_GROUP_ITEMS,
-  LIMIT_INPUT_BUFFER_RANGE,
-  LIMIT_INPUT_BUFFER_ALIGN,
-  LIMIT_COMPUTE_BUFFER_RANGE,
-  LIMIT_COMPUTE_BUFFER_ALIGN,
-  LIMIT_VERTEX_ATTRIBUTES,
-  LIMIT_VERTEX_ATTRIBUTE_OFFSET,
-  LIMIT_VERTEX_BUFFERS,
-  LIMIT_VERTEX_BUFFER_STRIDE,
-  LIMIT_VERTEX_SHADER_OUTPUTS,
-  LIMIT_COMPUTE_WIDTH,
-  LIMIT_COMPUTE_HEIGHT,
-  LIMIT_COMPUTE_DEPTH,
-  LIMIT_COMPUTE_GROUP_WIDTH,
-  LIMIT_COMPUTE_GROUP_HEIGHT,
-  LIMIT_COMPUTE_GROUP_DEPTH,
-  LIMIT_COMPUTE_GROUP_VOLUME,
-  LIMIT_COMPUTE_SHARED_MEMORY,
-  LIMIT_ALLOCATION_SIZE,
-  LIMIT_POINT_SIZE,
-  LIMIT_ANISOTROPY,
-  MAX_LIMITS
-} GraphicsLimit;
+typedef struct {
+  bool bptc;
+  bool astc;
+  bool pointSize;
+  bool wireframe;
+  bool anisotropy;
+  bool clipDistance;
+  bool cullDistance;
+  bool fullIndexBufferRange;
+  bool indirectDrawCount;
+  bool indirectDrawFirstInstance;
+  bool extraShaderInputs;
+  bool multiview;
+} GraphicsFeatures;
+
+typedef struct {
+  uint32_t textureSize2D;
+  uint32_t textureSize3D;
+  uint32_t textureSizeCube;
+  uint32_t textureLayers;
+  uint32_t canvasSize[2];
+  uint32_t canvasViews;
+  uint32_t bundleCount;
+  uint32_t bundleSlots;
+  uint32_t uniformBufferRange;
+  uint32_t storageBufferRange;
+  uint32_t uniformBufferAlign;
+  uint32_t storageBufferAlign;
+  uint32_t vertexAttributes;
+  uint32_t vertexAttributeOffset;
+  uint32_t vertexBuffers;
+  uint32_t vertexBufferStride;
+  uint32_t vertexShaderOutputs;
+  uint32_t computeCount[3];
+  uint32_t computeGroupSize[3];
+  uint32_t computeGroupVolume;
+  uint32_t computeSharedMemory;
+  uint32_t indirectDrawCount;
+  uint64_t allocationSize;
+  uint32_t pointSize[2];
+  float anisotropy;
+} GraphicsLimits;
 
 bool lovrGraphicsInit(bool debug);
 void lovrGraphicsDestroy(void);
 void lovrGraphicsCreateWindow(struct WindowFlags* flags);
-void lovrGraphicsGetLimits(double limits[MAX_LIMITS]);
+void lovrGraphicsGetFeatures(GraphicsFeatures* features);
+void lovrGraphicsGetLimits(GraphicsLimits* limits);
