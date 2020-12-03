@@ -51,5 +51,9 @@ typedef struct {
 bool lovrGraphicsInit(bool debug);
 void lovrGraphicsDestroy(void);
 void lovrGraphicsCreateWindow(struct WindowFlags* flags);
+bool lovrGraphicsHasWindow(void);
+uint32_t lovrGraphicsGetWidth(void);
+uint32_t lovrGraphicsGetHeight(void);
+float lovrGraphicsGetPixelDensity(void);
 void lovrGraphicsGetFeatures(GraphicsFeatures* features);
 void lovrGraphicsGetLimits(GraphicsLimits* limits);

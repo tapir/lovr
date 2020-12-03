@@ -70,6 +70,29 @@ void lovrGraphicsCreateWindow(WindowFlags* flags) {
   state.initialized = true;
 }
 
+bool lovrGraphicsHasWindow() {
+  return lovrPlatformHasWindow();
+}
+
+uint32_t lovrGraphicsGetWidth() {
+  return state.width;
+}
+
+uint32_t lovrGraphicsGetHeight() {
+  return state.height;
+}
+
+float lovrGraphicsGetPixelDensity() {
+  int width, height, framebufferWidth, framebufferHeight;
+  lovrPlatformGetWindowSize(&width, &height);
+  lovrPlatformGetFramebufferSize(&framebufferWidth, &framebufferHeight);
+  if (width == 0 || framebufferWidth == 0) {
+    return 0.f;
+  } else {
+    return (float) framebufferWidth / (float) width;
+  }
+}
+
 void lovrGraphicsGetFeatures(GraphicsFeatures* features) {
   features->bptc = state.features.bptc;
   features->astc = state.features.astc;

@@ -74,6 +74,33 @@ static int l_lovrGraphicsCreateWindow(lua_State* L) {
   return 0;
 }
 
+static int l_lovrGraphicsHasWindow(lua_State* L) {
+  bool window = lovrGraphicsHasWindow();
+  lua_pushboolean(L, window);
+  return 1;
+}
+
+static int l_lovrGraphicsGetWidth(lua_State* L) {
+  lua_pushnumber(L, lovrGraphicsGetWidth());
+  return 1;
+}
+
+static int l_lovrGraphicsGetHeight(lua_State* L) {
+  lua_pushnumber(L, lovrGraphicsGetHeight());
+  return 1;
+}
+
+static int l_lovrGraphicsGetDimensions(lua_State* L) {
+  lua_pushnumber(L, lovrGraphicsGetWidth());
+  lua_pushnumber(L, lovrGraphicsGetHeight());
+  return 2;
+}
+
+static int l_lovrGraphicsGetPixelDensity(lua_State* L) {
+  lua_pushnumber(L, lovrGraphicsGetPixelDensity());
+  return 1;
+}
+
 static int l_lovrGraphicsGetFeatures(lua_State* L) {
   if (lua_istable(L, 1)) {
     lua_settop(L, 1);
@@ -223,6 +250,11 @@ static int l_lovrGraphicsGetLimits(lua_State* L) {
 
 static const luaL_Reg lovrGraphics[] = {
   { "createWindow", l_lovrGraphicsCreateWindow },
+  { "hasWindow", l_lovrGraphicsHasWindow },
+  { "getWidth", l_lovrGraphicsGetWidth },
+  { "getHeight", l_lovrGraphicsGetHeight },
+  { "getDimensions", l_lovrGraphicsGetDimensions },
+  { "getPixelDensity", l_lovrGraphicsGetPixelDensity },
   { "getFeatures", l_lovrGraphicsGetFeatures },
   { "getLimits", l_lovrGraphicsGetLimits },
   { NULL, NULL }
