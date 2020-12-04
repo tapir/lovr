@@ -5,6 +5,16 @@
 #include "core/ref.h"
 #include <stdlib.h>
 
+StringEntry lovrBufferUsage[] = {
+  [BUFFER_VERTEX] = ENTRY("vertex"),
+  [BUFFER_INDEX] = ENTRY("index"),
+  [BUFFER_UNIFORM] = ENTRY("uniform"),
+  [BUFFER_STORAGE] = ENTRY("storage"),
+  [BUFFER_COPY] = ENTRY("copy"),
+  [BUFFER_PASTE] = ENTRY("paste"),
+  { 0 }
+};
+
 // Must be released when done
 static TextureData* luax_checktexturedata(lua_State* L, int index, bool flip) {
   TextureData* textureData = luax_totype(L, index, TextureData);
@@ -258,6 +268,43 @@ static int l_lovrGraphicsFlush(lua_State* L) {
   return 0;
 }
 
+static int l_lovrGraphicsNewBuffer(lua_State* L) {
+  BufferInfo info;
+
+  info.size = luaL_checkinteger(L, 1);
+  info.usage = ~0u;
+
+  if (lua_istable(L, 2)) {
+    lua_getfield(L, 2, "usage");
+    switch (lua_type(L, -1)) {
+      case LUA_TSTRING:
+        info.usage = 1 << luax_checkenum(L, -1, BufferUsage, NULL);
+        break;
+      case LUA_TTABLE:
+        info.usage = 0;
+        int length = luax_len(L, -1);
+        for (int i = 0; i < length; i++) {
+          lua_rawgeti(L, -1, i + 1);
+          info.usage |= 1 << luax_checkenum(L, -1, BufferUsage, NULL);
+          lua_pop(L, 1);
+        }
+        break;
+      default:
+        return luaL_error(L, "Buffer usage flags must be a string or a table of strings");
+    }
+    lua_pop(L, 1);
+
+    lua_getfield(L, 2, "label");
+    info.label = lua_tostring(L, -1);
+    lua_pop(L, 1);
+  }
+
+  Buffer* buffer = lovrBufferCreate(&info);
+  luax_pushtype(L, Buffer, buffer);
+  lovrRelease(Buffer, buffer);
+  return 1;
+}
+
 static const luaL_Reg lovrGraphics[] = {
   { "createWindow", l_lovrGraphicsCreateWindow },
   { "hasWindow", l_lovrGraphicsHasWindow },
@@ -269,6 +316,7 @@ static const luaL_Reg lovrGraphics[] = {
   { "getLimits", l_lovrGraphicsGetLimits },
   { "begin", l_lovrGraphicsBegin },
   { "flush", l_lovrGraphicsFlush },
+  { "newBuffer", l_lovrGraphicsNewBuffer },
   { NULL, NULL }
 };
 

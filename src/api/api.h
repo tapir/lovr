@@ -26,6 +26,7 @@ extern const luaL_Reg lovrAudioStream[];
 extern const luaL_Reg lovrBallJoint[];
 extern const luaL_Reg lovrBlob[];
 extern const luaL_Reg lovrBoxShape[];
+extern const luaL_Reg lovrBuffer[];
 extern const luaL_Reg lovrCanvas[];
 extern const luaL_Reg lovrCapsuleShape[];
 extern const luaL_Reg lovrChannel[];
