@@ -863,14 +863,16 @@ void gpu_flush() {
 }
 
 static void execute(gpu_batch** batches, uint32_t count) {
-  VkCommandBuffer commands[8];
-  uint32_t chunk = COUNTOF(commands);
-  while (count > 0) {
-    chunk = count < chunk ? count : chunk;
-    for (uint32_t i = 0; i < chunk; i++) commands[i] = batches[i]->cmd;
-    vkCmdExecuteCommands(state.commands, chunk, commands);
-    batches += chunk;
-    count -= chunk;
+  if (count > 0) {
+    VkCommandBuffer commands[8];
+    uint32_t chunk = COUNTOF(commands);
+    while (count > 0) {
+      chunk = count < chunk ? count : chunk;
+      for (uint32_t i = 0; i < chunk; i++) commands[i] = batches[i]->cmd;
+      vkCmdExecuteCommands(state.commands, chunk, commands);
+      batches += chunk;
+      count -= chunk;
+    }
   }
 }
 
@@ -951,8 +953,9 @@ bool gpu_buffer_init(gpu_buffer* buffer, gpu_buffer_info* info) {
     ((info->usage & GPU_BUFFER_USAGE_INDEX) ? VK_BUFFER_USAGE_INDEX_BUFFER_BIT : 0) |
     ((info->usage & GPU_BUFFER_USAGE_UNIFORM) ? VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT : 0) |
     ((info->usage & GPU_BUFFER_USAGE_STORAGE) ? VK_BUFFER_USAGE_STORAGE_BUFFER_BIT : 0) |
-    ((info->usage & GPU_BUFFER_USAGE_COPY) ? VK_BUFFER_USAGE_TRANSFER_SRC_BIT : 0) |
-    ((info->usage & GPU_BUFFER_USAGE_PASTE) ? VK_BUFFER_USAGE_TRANSFER_DST_BIT : 0);
+    ((info->usage & GPU_BUFFER_USAGE_INDIRECT) ? VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT : 0) |
+    ((info->usage & GPU_BUFFER_USAGE_UPLOAD) ? VK_BUFFER_USAGE_TRANSFER_DST_BIT : 0) |
+    ((info->usage & GPU_BUFFER_USAGE_DOWNLOAD) ? VK_BUFFER_USAGE_TRANSFER_SRC_BIT : 0);
 
   VkBufferCreateInfo bufferInfo = {
     .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,

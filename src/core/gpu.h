@@ -18,12 +18,13 @@ typedef void gpu_read_fn(void* data, uint64_t size, void* userdata);
 // Buffer
 
 typedef enum {
-  GPU_BUFFER_USAGE_VERTEX  = (1 << 0),
-  GPU_BUFFER_USAGE_INDEX   = (1 << 1),
-  GPU_BUFFER_USAGE_UNIFORM = (1 << 2),
-  GPU_BUFFER_USAGE_STORAGE = (1 << 3),
-  GPU_BUFFER_USAGE_COPY    = (1 << 4),
-  GPU_BUFFER_USAGE_PASTE   = (1 << 5)
+  GPU_BUFFER_USAGE_VERTEX   = (1 << 0),
+  GPU_BUFFER_USAGE_INDEX    = (1 << 1),
+  GPU_BUFFER_USAGE_UNIFORM  = (1 << 2),
+  GPU_BUFFER_USAGE_STORAGE  = (1 << 3),
+  GPU_BUFFER_USAGE_INDIRECT = (1 << 4),
+  GPU_BUFFER_USAGE_UPLOAD   = (1 << 5),
+  GPU_BUFFER_USAGE_DOWNLOAD = (1 << 6)
 } gpu_buffer_usage;
 
 typedef struct {

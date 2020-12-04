@@ -9,9 +9,10 @@ StringEntry lovrBufferUsage[] = {
   [BUFFER_VERTEX] = ENTRY("vertex"),
   [BUFFER_INDEX] = ENTRY("index"),
   [BUFFER_UNIFORM] = ENTRY("uniform"),
-  [BUFFER_STORAGE] = ENTRY("storage"),
-  [BUFFER_COPY] = ENTRY("copy"),
-  [BUFFER_PASTE] = ENTRY("paste"),
+  [BUFFER_COMPUTE] = ENTRY("compute"),
+  [BUFFER_ARGUMENT] = ENTRY("argument"),
+  [BUFFER_UPLOAD] = ENTRY("upload"),
+  [BUFFER_DOWNLOAD] = ENTRY("download"),
   { 0 }
 };
 
