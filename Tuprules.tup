@@ -12,7 +12,7 @@ CFLAGS += -Wno-unused-parameter
 CFLAGS_@(OPENVR) += -Wno-typedef-redefinition
 CFLAGS_@(STRICT) += -Werror
 FLAGS_@(DEBUG) += -g
-FLAGS_@(OPTIMIZE) += -Oz
+FLAGS_@(OPTIMIZE) += -O2 -flto
 FLAGS_@(SANITIZE) += -fsanitize=address,undefined
 
 ## Windows

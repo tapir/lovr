@@ -125,7 +125,9 @@ void lovrRasterizerLoadGlyph(Rasterizer* rasterizer, uint32_t character, Glyph* 
   glyph->dx = empty ? 0 : roundf(bearing * rasterizer->scale);
   glyph->dy = empty ? 0 : roundf(y1 * rasterizer->scale);
   glyph->advance = roundf(advance * rasterizer->scale);
-  glyph->data = lovrTextureDataCreate(glyph->tw, glyph->th, NULL, 0, FORMAT_RGB);
+
+  // FIXME completely broken, need to update msdfgen and add bindings for generateMTSDF because we no longer support RGB
+  glyph->data = lovrTextureDataCreate(glyph->tw, glyph->th, NULL, 0, FORMAT_RGBA8);
 
   // Render SDF
   float tx = GLYPH_PADDING + -glyph->dx;
