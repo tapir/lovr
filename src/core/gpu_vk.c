@@ -224,6 +224,7 @@ typedef struct {
 
 static gpu_mapping scratch(uint32_t size);
 static VkFramebuffer getFramebuffer(const VkFramebufferCreateInfo* info);
+static void ketchup(void);
 static void readback(void);
 static void condemn(void* handle, VkObjectType type);
 static void expunge(void);
@@ -733,8 +734,8 @@ bool gpu_init(gpu_config* config) {
   }
 
   gpu_mutex_init(&state.morgue.lock);
-  state.tick[CPU] = COUNTOF(state.ticks);
-  state.tick[GPU] = ~0u;
+  state.tick[CPU] = 1;
+  state.tick[GPU] = 0;
   state.scratchpads.head = ~0u;
   state.scratchpads.tail = ~0u;
   state.currentBackbuffer = ~0u;
@@ -801,7 +802,7 @@ void gpu_begin() {
   GPU_VK(vkWaitForFences(state.device, 1, &tick->fence, VK_FALSE, ~0ull));
   GPU_VK(vkResetFences(state.device, 1, &tick->fence));
   GPU_VK(vkResetCommandPool(state.device, tick->pool, 0));
-  state.tick[GPU]++;
+  ketchup();
   readback();
   expunge();
 
@@ -1651,6 +1652,9 @@ bool gpu_bundle_init(gpu_bundle* bundle, gpu_bundle_info* info) {
     gpu_binding_pool* pool = NULL;
     uint32_t index = ~0u;
 
+    // Make sure we have an up to date GPU tick before trying to reuse a pool
+    ketchup();
+
     // If there's a crusty old pool laying around that isn't even being used by anyone, it's hired.
     if (lagoon.tail != ~0u && state.tick[GPU] >= lagoon.data[lagoon.tail].tick) {
       index = lagoon.tail;
@@ -1995,6 +1999,8 @@ gpu_batch* gpu_batch_begin(gpu_pass* pass, uint32_t renderSize[2]) {
   gpu_batch* batch;
   uint32_t index;
 
+  ketchup();
+
   if (pool->tail != ~0u && state.tick[GPU] >= pool->data[pool->tail].tick) {
     index = pool->tail;
     batch = &pool->data[pool->tail];
@@ -2231,6 +2237,7 @@ static gpu_mapping scratch(uint32_t size) {
   } else {
     // Otherwise, see if it's possible to reuse the oldest existing scratch buffer
     GPU_CHECK(size <= SCRATCHPAD_SIZE, "Tried to map too much scratch memory");
+    ketchup();
     if (pool->tail != ~0u && state.tick[GPU] >= pool->data[pool->tail].tick) {
       index = pool->tail;
       scratchpad = &pool->data[index];
@@ -2315,6 +2322,18 @@ static gpu_mapping scratch(uint32_t size) {
   pool->cursor += size;
 
   return mapping;
+}
+
+static void ketchup() {
+  while (state.tick[GPU] < state.tick[CPU]) {
+    gpu_tick* tick = &state.ticks[state.tick[GPU] & 0xf];
+    VkResult result = vkGetFenceStatus(state.device, tick->fence);
+    switch (result) {
+      case VK_SUCCESS: state.tick[GPU]++; continue;
+      case VK_NOT_READY: return;
+      default: GPU_THROW(getErrorString(result)); return;
+    }
+  }
 }
 
 static void readback() {
