@@ -78,6 +78,7 @@ extern StringEntry lovrJointType[];
 extern StringEntry lovrShapeType[];
 extern StringEntry lovrSourceType[];
 extern StringEntry lovrTextureFormat[];
+extern StringEntry lovrTextureType[];
 extern StringEntry lovrTimeUnit[];
 
 // General helpers
@@ -141,15 +142,6 @@ int luax_pushvariant(lua_State* L, struct Variant* variant);
 
 #ifdef LOVR_ENABLE_FILESYSTEM
 void* luax_readfile(const char* filename, size_t* bytesRead);
-#endif
-
-#ifdef LOVR_ENABLE_GRAPHICS
-struct Attachment;
-struct Texture;
-struct Uniform;
-int luax_checkuniform(lua_State* L, int index, const struct Uniform* uniform, void* dest, const char* debug);
-int luax_optmipmap(lua_State* L, int index, struct Texture* texture);
-void luax_readattachments(lua_State* L, int index, struct Attachment* attachments, int* count);
 #endif
 
 #ifdef LOVR_ENABLE_MATH
