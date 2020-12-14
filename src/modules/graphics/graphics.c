@@ -201,11 +201,7 @@ Buffer* lovrBufferCreate(BufferInfo* info) {
     .label = info->label
   };
 
-  if (!gpu_buffer_init(buffer->gpu, &gpuInfo)) {
-    lovrRelease(Buffer, buffer);
-    return NULL;
-  }
-
+  lovrAssert(gpu_buffer_init(buffer->gpu, &gpuInfo), "Could not create Buffer");
   return buffer;
 }
 
@@ -249,17 +245,17 @@ void* lovrBufferMap(Buffer* buffer, uint32_t offset, uint32_t size) {
 
 // Texture
 
+static const gpu_texture_type gpuTextureTypes[] = {
+  [TEXTURE_2D] = GPU_TEXTURE_TYPE_2D,
+  [TEXTURE_CUBE] = GPU_TEXTURE_TYPE_CUBE,
+  [TEXTURE_VOLUME] = GPU_TEXTURE_TYPE_3D,
+  [TEXTURE_ARRAY] = GPU_TEXTURE_TYPE_ARRAY
+};
+
 Texture* lovrTextureCreate(TextureInfo* info) {
   Texture* texture = _lovrAlloc(sizeof(Texture) + gpu_sizeof_texture());
   texture->gpu = (gpu_texture*) (texture + 1);
   texture->info = *info;
-
-  static const gpu_texture_type gpuTextureTypes[] = {
-    [TEXTURE_2D] = GPU_TEXTURE_TYPE_2D,
-    [TEXTURE_CUBE] = GPU_TEXTURE_TYPE_CUBE,
-    [TEXTURE_VOLUME] = GPU_TEXTURE_TYPE_3D,
-    [TEXTURE_ARRAY] = GPU_TEXTURE_TYPE_ARRAY
-  };
 
   static const gpu_texture_format gpuTextureFormats[] = {
     [FORMAT_R8] = GPU_TEXTURE_FORMAT_R8,
@@ -328,17 +324,36 @@ Texture* lovrTextureCreate(TextureInfo* info) {
     .label = info->label
   };
 
-  if (!gpu_texture_init(texture->gpu, &gpuInfo)) {
-    lovrRelease(Texture, texture);
-    return NULL;
-  }
+  lovrAssert(gpu_texture_init(texture->gpu, &gpuInfo), "Could not create Texture");
+  return texture;
+}
 
+Texture* lovrTextureCreateView(TextureView* view) {
+  Texture* texture = _lovrAlloc(sizeof(Texture) + gpu_sizeof_texture());
+  texture->gpu = (gpu_texture*) (texture + 1);
+  texture->info = view->source->info;
+  texture->info.view = *view;
+
+  gpu_texture_view_info gpuInfo = {
+    .source = view->source->gpu,
+    .type = gpuTextureTypes[view->type],
+    .layerIndex = view->layerIndex,
+    .layerCount = view->layerCount,
+    .mipmapIndex = view->mipmapIndex,
+    .mipmapCount = view->mipmapCount
+  };
+
+  lovrAssert(gpu_texture_init_view(texture->gpu, &gpuInfo), "Could not create Texture view");
+  lovrRetain(view->source);
   return texture;
 }
 
 void lovrTextureDestroy(void* ref) {
   Texture* texture = ref;
   gpu_texture_destroy(texture->gpu);
+  if (texture->info.view.source) {
+    lovrRelease(Texture, texture->info.view.source);
+  }
 }
 
 const TextureInfo* lovrTextureGetInfo(Texture* texture) {
