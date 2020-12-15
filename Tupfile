@@ -57,6 +57,7 @@ SRC_@(THREAD) += src/api/l_thread*.c
 SRC_@(TIMER) += src/api/l_timer*.c
 SRC_@(JSON) += src/lib/lua-cjson/*.c
 SRC_@(ENET) += src/lib/lua-enet/*.c
+SRC_@(MONGOOSE) += src/lib/lua-mongoose/*.c
 
 # resources
 RES += src/resources/boot.lua

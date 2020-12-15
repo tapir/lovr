@@ -16,6 +16,7 @@ option(LOVR_ENABLE_TIMER "Enable the timer module" ON)
 
 option(LOVR_ENABLE_ENET "Bundle with lua-enet" ON)
 option(LOVR_ENABLE_JSON "Bundle with lua-cjson" ON)
+option(LOVR_ENABLE_MONGOOSE "Bundle with lua-mongoose" ON)
 
 option(LOVR_USE_LUAJIT "Use LuaJIT instead of Lua" ON)
 option(LOVR_USE_OPENVR "Enable the OpenVR backend for the headset module" ON)
@@ -93,6 +94,13 @@ if(LOVR_ENABLE_ENET)
       target_compile_definitions(enet PRIVATE __APPLE__)
     endif()
   endif()
+endif()
+
+# mongoose
+if(LOVR_ENABLE_MONGOOSE)
+    include_directories(deps/mongoose)
+    add_library(mongoose STATIC deps/mongoose/mongoose.c)
+    set(LOVR_MONGOOSE mongoose)
 endif()
 
 # GLFW
@@ -356,6 +364,7 @@ set_target_properties(lovr PROPERTIES C_VISIBILITY_PRESET default)
 set_target_properties(lovr PROPERTIES C_STANDARD 99)
 target_include_directories(lovr PRIVATE src src/modules)
 target_link_libraries(lovr
+  ${LOVR_MONGOOSE}
   ${LOVR_ENET}
   ${LOVR_GLFW}
   ${LOVR_LUA}
@@ -542,6 +551,11 @@ if(LOVR_ENABLE_JSON)
     src/lib/lua-cjson/lua_cjson.c
     src/lib/lua-cjson/strbuf.c
   )
+endif()
+
+if(LOVR_ENABLE_MONGOOSE)
+  add_definitions(-DLOVR_ENABLE_MONGOOSE)
+  target_sources(lovr PRIVATE src/lib/lua-mongoose/mongoose.c)
 endif()
 
 # Platforms

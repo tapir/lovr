@@ -69,6 +69,7 @@ CFLAGS_@(THREAD) += -DLOVR_ENABLE_THREAD
 CFLAGS_@(TIMER) += -DLOVR_ENABLE_TIMER
 CFLAGS_@(JSON) += -DLOVR_ENABLE_JSON
 CFLAGS_@(ENET) += -DLOVR_ENABLE_ENET
+CFLAGS_@(MONGOOSE) += -DLOVR_ENABLE_MONGOOSE
 
 ## Headset backends
 CFLAGS_@(SIMULATOR) += -DLOVR_USE_DESKTOP_HEADSET
@@ -174,6 +175,13 @@ ifneq (@(CMAKE_DEPS),)
   LDFLAGS_@(ENET)_macos += -L$(BUILD)/enet -lenet
   LDFLAGS_@(ENET)_linux += -L$(BUILD)/enet -lenet
   LDFLAGS_@(ENET)_android += -L$(BUILD)/enet -lenet
+
+  # mongoose
+  CFLAGS_@(MONGOOSE) += -I$(DEPS)/mongoose
+  LDFLAGS_@(MONGOOSE)_win32 += -L$(BUILD)/mongoose/$(CONFIG) -lmongoose
+  LDFLAGS_@(MONGOOSE)_macos += -L$(BUILD)/mongoose -lmongoose
+  LDFLAGS_@(MONGOOSE)_linux += -L$(BUILD)/mongoose -lmongoose
+  LDFLAGS_@(MONGOOSE)_android += -L$(BUILD)/mongoose -lmongoose
 endif
 
 ## Android
